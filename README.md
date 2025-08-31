@@ -1,10 +1,10 @@
 # Honey-Wildflower-Price-Prediction
 
-## 📌 Project Overview
+## Project Overview
 This project analyzes the **Honey Wildflower dataset** to explore the factors that influence the **market price of honey**.  
 The goal is to build a **predictive model** that can estimate honey prices based on its physical and chemical attributes.  
 
-## 🛠️ Tools & Technologies
+## Tools & Technologies
 - **Programming Language:** R  
 - **Libraries & Packages:** tidyverse, caret, psych, skimr  
 - **Techniques Used:**  
