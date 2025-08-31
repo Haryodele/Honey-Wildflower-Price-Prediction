@@ -1,0 +1,85 @@
+#Loading the necessary package
+library(tidyverse) # Data import & wrangling
+library(caret) # Model performance evaluation
+
+### STEP 1: DATA PRE-PROCESSING
+##Importing the data
+data <- read_csv("Honey.Wildflower.csv", show_col_types=FALSE)
+data
+
+### Data Preparation & Exploration
+#Checking the structure of the dataset
+str(data)
+
+summary(data)
+skimr::skim(data)
+#Viewing the unique value on the column
+unique(data$Pollen_analysis)
+#Removing the column since it has only one observation
+data <- data %>%
+  select(-Pollen_analysis)
+
+### Visualize the relationship among the attributes
+psych::pairs.panels(data, gap = 0, pch=21)
+
+#Removing purity since it is perfectly correlated
+data <- data %>% 
+  select(-Purity)
+
+data
+#Setting seed for reproducibility 
+set.seed(123)
+#Partioning the dataset into training and test sets
+index <- createDataPartition(data$Price, p = .80, list = FALSE)
+training <- data[index, ]
+testing <- data[-index, ]
+
+# Cross check the dimension of the two datasets
+dim(training)
+dim(testing)
+dim(data)
+
+##Scaling the data
+preProcValues <- preProcess(training, method = c("center", "scale"))
+trainTransformed <- predict(preProcValues, training)
+summary(trainTransformed)
+testTransformed <- predict(preProcValues, testing)
+
+### STEP 2: TRAIN THE MODEL
+data
+### Cross-validation
+
+# Fit lm model using 10-fold CV
+set.seed(123)
+modelCV <- train(
+  Price ~., 
+  trainTransformed,
+  method = "lm",
+  trControl = trainControl(
+    method = "repeatedcv", 
+    number = 10,
+    repeats = 10, 
+    verboseIter = TRUE
+  )
+)
+## STEP 3: EVALUATE THE MODEL
+### Print model to console
+modelCV
+#Standard deviation of Price
+sd(data$Price)
+### Final model
+set.seed(123)
+modelFinal <- train(
+  Price ~., 
+  trainTransformed,
+  method = "lm",
+  trControl = trainControl(
+    method = "none", 
+    verboseIter = TRUE  ))
+summary(modelFinal)
+
+## STEP 4: TEST THE MODEL
+### Model's performance metrics
+predictions <- predict(modelFinal, testTransformed)
+performance <- postResample(predictions, testTransformed$Price)
+print(performance)
